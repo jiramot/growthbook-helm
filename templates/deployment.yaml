@@ -40,11 +40,15 @@ spec:
               protocol: TCP
             {{- end }}
           env:
+          {{- range $key, $value := .Values.growthbook.environment }}
+          - name: {{ $key }}
+            value: {{ $value }}
+          {{- end }}
           - name: MONGODB_URI
             valueFrom:
               secretKeyRef:
-                name: mongo-secret
-                key: mongodb_uri
+                name: {{ .Values.mongodb.secretName }}
+                key: {{ .Values.mongodb.secretKeyName }}
           {{- range .Values.service.ports }}
           livenessProbe:
             httpGet:
