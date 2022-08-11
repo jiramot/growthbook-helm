@@ -34,26 +34,27 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: api
-              containerPort: 3100
+            {{- range .Values.service.ports }}
+            - name: http-{{ . }}
+              containerPort: {{ . }}
               protocol: TCP
-            - name: web
-              containerPort: 3000
-              protocol: TCP
+            {{- end }}
           env:
           - name: MONGODB_URI
             valueFrom:
               secretKeyRef:
                 name: mongo-secret
                 key: mongodb_uri
+          {{- range .Values.service.ports }}
           livenessProbe:
             httpGet:
               path: /
-              port: api
+              port: {{ . }}
           readinessProbe:
             httpGet:
               path: /
-              port: api
+              port: {{ . }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
